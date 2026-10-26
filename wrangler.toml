@@ -1,0 +1,7 @@
+name = "zeico-parts"
+pages_build_output_dir = "public"
+compatibility_date = "2025-09-01"
+
+[[kv_namespaces]]
+binding = "KV"
+id = "aa5fdb47cf224837b6b375bb7bf2409b"

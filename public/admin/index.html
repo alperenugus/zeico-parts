@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Zeico Admin</title>
+  <link rel="icon" type="image/png" href="/assets/img/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/admin/admin.css">
+</head>
+<body>
+  <!-- Login -->
+  <main class="login" id="loginView" hidden>
+    <form class="login__card" id="loginForm">
+      <img src="/assets/img/logo.png" alt="Zeico Auto Parts" class="login__logo" width="260" height="71">
+      <h1 data-t="loginTitle">Yönetim Paneli</h1>
+      <p class="muted" data-t="loginSub">Stok ve fiyat yönetimi için giriş yapın.</p>
+      <label class="field"><span data-t="password">Şifre</span>
+        <input type="password" name="password" autocomplete="current-password" required autofocus>
+      </label>
+      <p class="login__error" id="loginError" role="alert" hidden></p>
+      <button class="btn btn--primary btn--block" type="submit" data-t="login">Giriş yap</button>
+      <div class="login__foot"><button type="button" class="lang-toggle" data-lang-toggle>EN</button><a href="/" data-t="backToSite">← Siteye dön</a></div>
+    </form>
+  </main>
+
+  <!-- App -->
+  <div class="app" id="appView" hidden>
+    <header class="top">
+      <a href="/admin/" class="top__brand"><img src="/assets/img/logo-white.png" alt="Zeico" width="160" height="44"><span data-t="panel">Stok & Fiyat</span></a>
+      <nav class="tabs" role="tablist">
+        <button class="tabs__btn is-active" data-view="stock" role="tab" type="button" data-t="tabStock">Ürünler</button>
+        <button class="tabs__btn" data-view="log" role="tab" type="button" data-t="tabLog">Değişiklik geçmişi</button>
+      </nav>
+      <div class="top__actions">
+        <button type="button" class="lang-toggle" data-lang-toggle>EN</button>
+        <a href="/" target="_blank" rel="noopener" class="btn btn--ghost btn--sm" data-t="viewSite">Siteyi aç</a>
+        <button type="button" class="btn btn--ghost btn--sm" id="logoutBtn" data-t="logout">Çıkış</button>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <section class="kpis" id="kpis"></section>
+
+      <section id="stockView">
+        <div class="toolbar">
+          <input type="search" id="q" class="input" placeholder="Ürün adı, marka veya parça no…" data-t-ph="searchPh">
+          <select id="catFilter" class="input"></select>
+          <select id="statusFilter" class="input">
+            <option value="all" data-t="stAll">Tüm durumlar</option>
+            <option value="in" data-t="stIn">Stokta</option>
+            <option value="low" data-t="stLow">Düşük stok</option>
+            <option value="order" data-t="stOut">Tükendi / Siparişle</option>
+            <option value="untracked" data-t="stUntracked">Takip edilmiyor</option>
+          </select>
+          <button type="button" class="btn btn--outline" id="exportBtn" data-t="export">CSV indir</button>
+        </div>
+        <p class="hint" data-t="hint">Fiyatlar € ve KDV hariçtir. Fiyatı boş bırakırsanız sitede “Fiyat sorun” görünür. İndirimli göstermek için “Eski fiyat” alanına satış fiyatından yüksek bir değer girin. Stok 0 → Siparişle, 1–5 → Sınırlı stok.</p>
+        <div class="table-wrap">
+          <table class="table" id="table">
+            <thead>
+              <tr>
+                <th data-t="colPhoto">Foto</th>
+                <th data-t="colProduct">Ürün</th>
+                <th data-t="colPrice">Fiyat (€)</th>
+                <th data-t="colOld">Eski fiyat (€)</th>
+                <th data-t="colQty">Stok adedi</th>
+                <th data-t="colStatus">Durum</th>
+                <th data-t="colUpdated">Güncelleme</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="logView" hidden>
+        <div class="table-wrap">
+          <table class="table table--log">
+            <thead><tr><th data-t="logTime">Zaman</th><th data-t="colProduct">Ürün</th><th data-t="logField">Alan</th><th data-t="logChange">Değişiklik</th></tr></thead>
+            <tbody id="logRows"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <div class="savebar" id="savebar" hidden>
+      <span id="saveCount"></span>
+      <div>
+        <button type="button" class="btn btn--ghost" id="discardBtn" data-t="discard">Geri al</button>
+        <button type="button" class="btn btn--accent" id="saveBtn" data-t="save">Değişiklikleri kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Photos dialog -->
+  <dialog class="dialog" id="photoDialog">
+    <div class="dialog__head">
+      <div><h2 data-t="photos">Fotoğraflar</h2><p class="muted" id="photoFor"></p></div>
+      <button type="button" class="icon-btn" data-close aria-label="Kapat">✕</button>
+    </div>
+    <div class="photos" id="photoList"></div>
+    <label class="drop" id="drop">
+      <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp" multiple hidden>
+      <strong data-t="dropTitle">Fotoğraf yükle</strong>
+      <span class="muted" data-t="dropSub">Sürükleyip bırakın veya tıklayın • JPG, PNG, WebP • Otomatik olarak küçültülür</span>
+    </label>
+    <div class="dialog__foot">
+      <button type="button" class="btn btn--outline btn--sm" id="resetPhotos" data-t="resetPhotos">Varsayılan fotoğraflara dön</button>
+      <span class="muted" data-t="photoNote">İlk fotoğraf ana görseldir. Değişiklikler anında yayınlanır.</span>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="/assets/js/products.js"></script>
+  <script src="/admin/admin.js"></script>
+</body>
+</html>
